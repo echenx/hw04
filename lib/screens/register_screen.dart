@@ -32,6 +32,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         'lastName': _lastNameController.text,
         'role': 'user',
         'registrationDateTime': FieldValue.serverTimestamp(),
+        'email': _emailController.text,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
