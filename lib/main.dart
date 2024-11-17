@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:hw04/screens/message_boards_screen.dart';
 import 'screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hw04/screens/login_screen.dart';
 import 'firebase_options.dart';
 import 'screens/register_screen.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +24,7 @@ class MyApp extends StatelessWidget {
         '/splash': (context) => SplashScreen(),
         '/login': (context) => LoginScreen(),
         '/register': (context) => RegisterScreen(),
+        '/home': (context) => MessageBoardsScreen(),
       },
     );
   }
