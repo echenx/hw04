@@ -27,6 +27,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final uid = userCredential.user!.uid;
 
       await _firestore.collection('users').doc(uid).set({
+        'uid': uid,
         'firstName': _firstNameController.text,
         'lastName': _lastNameController.text,
         'role': 'user',

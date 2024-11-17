@@ -1,30 +1,112 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MessageBoardsScreen extends StatelessWidget {
   final List<Map<String, String>> messageBoards = [
-    {
-      'name': 'Games',
-      'icon': 'assets/icons/joystick.png',
-    },
-    {
-      'name': 'Business',
-      'icon': 'assets/icons/business.png',
-    },
-    {
-      'name': 'Public Health',
-      'icon': 'assets/icons/public_health.png',
-    },
-    {
-      'name': 'Study',
-      'icon': 'assets/icons/study.png',
-    },
+    {'name': 'Games', 'icon': 'assets/icons/joystick.png'},
+    {'name': 'Business', 'icon': 'assets/icons/business.png'},
+    {'name': 'Public Health', 'icon': 'assets/icons/public_health.png'},
+    {'name': 'Study', 'icon': 'assets/icons/study.png'},
   ];
+
+  Future<Map<String, String>> _fetchUserData() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (userDoc.exists) {
+        final data = userDoc.data()!;
+        return {
+          'firstName': data['firstName'] ?? 'First',
+          'lastName': data['lastName'] ?? 'Last',
+        };
+      }
+    }
+
+    return {'firstName': 'Guest', 'lastName': 'User'};
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Message Boards'),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
+        ),
+      ),
+      drawer: Drawer(
+        child: FutureBuilder<Map<String, String>>(
+          future: _fetchUserData(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError || !snapshot.hasData) {
+              return Center(child: Text('Error loading user data'));
+            }
+
+            final userData = snapshot.data!;
+            return ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                DrawerHeader(
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.account_circle, size: 80, color: Colors.white),
+                      SizedBox(height: 10),
+                      Text(
+                        '${userData['firstName']} ${userData['lastName']}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                ListTile(
+                  leading: Icon(Icons.message),
+                  title: Text('Message Boards'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/messageBoards');
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.person),
+                  title: Text('Profile'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/profile');
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.settings),
+                  title: Text('Settings'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/settings');
+                  },
+                ),
+              ],
+            );
+          },
+        ),
       ),
       body: ListView.builder(
         itemCount: messageBoards.length,
@@ -42,7 +124,7 @@ class MessageBoardsScreen extends StatelessWidget {
                 );
               },
               child: Container(
-                height: 100, 
+                height: 100,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12.0),

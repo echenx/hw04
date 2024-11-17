@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hw04/screens/message_boards_screen.dart';
+import 'package:hw04/screens/profile_screen.dart';
+import 'package:hw04/screens/settings_screen.dart';
 import 'screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hw04/screens/login_screen.dart';
@@ -25,6 +27,9 @@ class MyApp extends StatelessWidget {
         '/login': (context) => LoginScreen(),
         '/register': (context) => RegisterScreen(),
         '/home': (context) => MessageBoardsScreen(),
+        '/messageBoards': (context) => MessageBoardsScreen(),
+        '/profile': (context) => ProfileScreen(),
+        '/settings': (context) => SettingsScreen(),
       },
     );
   }
