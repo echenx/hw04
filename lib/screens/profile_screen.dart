@@ -11,8 +11,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
 
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
+  final _usernameController = TextEditingController();
 
   Future<void> _fetchUserData() async {
     final user = _auth.currentUser;
@@ -22,8 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (userDoc.exists) {
         final data = userDoc.data()!;
-        _firstNameController.text = data['firstName'] ?? '';
-        _lastNameController.text = data['lastName'] ?? '';
+        _usernameController.text = data['username'] ?? '';
       }
     }
   }
@@ -34,8 +32,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (user != null) {
       try {
         await _firestore.collection('users').doc(user.uid).update({
-          'firstName': _firstNameController.text,
-          'lastName': _lastNameController.text,
+          'username': _usernameController.text,
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -81,13 +78,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Icon(Icons.account_circle, size: 80, color: Colors.white),
                   SizedBox(height: 10),
-                  Text(
-                    'User Name',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  FutureBuilder<DocumentSnapshot>(
+                    future: _firestore
+                        .collection('users')
+                        .doc(_auth.currentUser?.uid)
+                        .get(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      }
+                      if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      }
+                      final data =
+                          snapshot.data?.data() as Map<String, dynamic>;
+                      return Text(
+                        '${data['firstName']} ${data['lastName']}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -122,15 +135,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
-              controller: _firstNameController,
+              controller: _usernameController,
               decoration: InputDecoration(
-                labelText: 'First Name',
-              ),
-            ),
-            TextField(
-              controller: _lastNameController,
-              decoration: InputDecoration(
-                labelText: 'Last Name',
+                labelText: 'Username',
               ),
             ),
             SizedBox(height: 20),

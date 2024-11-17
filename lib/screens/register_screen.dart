@@ -15,9 +15,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
+  final _usernameController = TextEditingController();
+
+  Future<bool> _isUsernameAvailable(String username) async {
+    final QuerySnapshot result = await _firestore
+        .collection('users')
+        .where('username', isEqualTo: username)
+        .get();
+
+    return result.docs.isEmpty;
+  }
 
   Future<void> _registerUser() async {
     try {
+      final username = _usernameController.text.trim();
+      final isAvailable = await _isUsernameAvailable(username);
+
+      if (!isAvailable) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Username is already taken.')),
+        );
+        return;
+      }
+
       final UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(
         email: _emailController.text,
@@ -28,6 +48,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       await _firestore.collection('users').doc(uid).set({
         'uid': uid,
+        'username': username,
         'firstName': _firstNameController.text,
         'lastName': _lastNameController.text,
         'role': 'user',
@@ -53,7 +74,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       appBar: AppBar(title: Text('Register')),
       body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: Column(
+        child: ListView(
           children: [
             TextField(
               controller: _firstNameController,
@@ -62,6 +83,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
             TextField(
               controller: _lastNameController,
               decoration: InputDecoration(labelText: 'Last Name'),
+            ),
+            TextField(
+              controller: _usernameController,
+              decoration: InputDecoration(labelText: 'Username'),
             ),
             TextField(
               controller: _emailController,
