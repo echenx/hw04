@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'chat_screen.dart';
 
 class MessageBoardsScreen extends StatelessWidget {
   final List<Map<String, String>> messageBoards = [
@@ -117,10 +118,11 @@ class MessageBoardsScreen extends StatelessWidget {
                 const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: GestureDetector(
               onTap: () {
-                Navigator.pushNamed(
+                Navigator.push(
                   context,
-                  '/chat',
-                  arguments: board['name'],
+                  MaterialPageRoute(
+                    builder: (context) => ChatScreen(boardName: board['name']!),
+                  ),
                 );
               },
               child: Container(
